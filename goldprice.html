@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gold Valuation App - Multi-Item</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 15px;
+            background-color: #f4f4f4;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            color: #d4af37;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .input-group input[type="number"],
+        .input-group input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+         .input-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+            background-color: white;
+        }
+
+
+        .input-group input[type="number"]:focus,
+        .input-group input[type="text"]:focus,
+        .input-group select:focus {
+            border-color: #d4af37;
+            outline: none;
+        }
+
+        .input-hint {
+            font-size: 0.9em;
+            color: #777;
+            margin-top: 5px;
+        }
+
+        .gold-item-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+
+        .gold-item-row .input-group {
+            margin-bottom: 0;
+            flex-grow: 1;
+        }
+
+        .gold-item-row input[type="number"],
+        .gold-item-row input[type="text"] {
+             width: calc(100% - 10px);
+        }
+
+
+        .remove-item-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            height: fit-content;
+        }
+        .remove-item-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #d4af37;
+            color: white;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            flex-grow: 1;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #c89f29;
+        }
+
+        button#fetchRateBtn {
+            background-color: #5cb85c;
+        }
+        button#fetchRateBtn:hover {
+            background-color: #4cae4c;
+        }
+
+        button#addItemBtn {
+            background-color: #3498db;
+            margin-top: 5px;
+        }
+        button#addItemBtn:hover {
+            background-color: #2980b9;
+        }
+
+
+        .output-section {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .output-section h2 {
+            color: #d4af37;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .output-item {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            border-left: 4px solid #d4af37;
+            overflow: auto; /* To contain floated span */
+        }
+
+        .output-item strong {
+            color: #333;
+        }
+
+        .output-item span {
+            float: right;
+            font-weight: bold;
+        }
+        .output-item .details {
+            font-size: 0.9em;
+            color: #555;
+            clear: both;
+            display: block;
+            margin-top: 5px;
+        }
+
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                padding: 15px;
+            }
+
+            .gold-item-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .gold-item-row .input-group {
+                width: 100%;
+            }
+            .gold-item-row input[type="number"],
+            .gold-item-row input[type="text"] {
+                width: calc(100% - 22px);
+            }
+            .remove-item-btn {
+                margin-top: 5px;
+                width: 100%;
+            }
+
+            button {
+                font-size: 15px;
+                padding: 10px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gold Valuation (Multi-Item)</h1>
+
+        <div class="input-group">
+            <label for="rate24K">Market Gold Rate (per gram)</label>
+            <input type="number" id="rate24K" placeholder="Enter 24K Rate (e.g., 7000)">
+            <div class="input-hint">Or enter 22K rate below.</div>
+        </div>
+
+        <div class="input-group">
+            <input type="number" id="rate22K" placeholder="Enter 22K Rate (e.g., 6416.67)">
+        </div>
+        <button id="fetchRateBtn" onclick="fetchGoldRate()">Fetch Live Gold Rate (INR)</button>
+        <div class="input-hint" style="text-align: center; margin-top: -10px; margin-bottom: 15px;">(Manual entry preferred for now)</div>
+
+        <div id="goldItemsContainer">
+            </div>
+        <button id="addItemBtn" onclick="addGoldItem()">+ Add Gold Item</button>
+
+        <div class="input-group" style="margin-top: 20px;">
+            <label for="depreciation">Depreciation (%)</label>
+            <input type="number" id="depreciation" value="3">
+        </div>
+
+        <button onclick="calculateValue()" style="margin-top: 20px; background-color: #d4af37;">Calculate Total Value</button>
+
+        <div class="output-section" id="results" style="display: none;">
+            <h2>Valuation Results</h2>
+            <div class="output-item"><strong>Total Grams:</strong> <span id="totalGrams"></span></div>
+            <div class="output-item"><strong>Total Actual Value of Gold (before depreciation):</strong> ₹<span id="totalActualValue"></span>
+                <div class="details">Based on mapped purities of items.</div>
+            </div>
+            <div class="output-item"><strong>Total Offered Rate (after depreciation):</strong> ₹<span id="offeredRate"></span></div>
+            <hr>
+            <div class="output-item"><strong>Total Potential Value (at input purities):</strong> ₹<span id="totalInputValue"></span></div>
+            <div class="output-item"><strong>Overall Total Loss:</strong> ₹<span id="totalLoss"></span></div>
+            <div class="output-item"><strong>Overall Per Gram Loss:</strong> ₹<span id="perGramLoss"></span></div>
+            <div class="output-item" style="background-color: #ffebee; border-left-color: #d32f2f;">
+                <strong>Scenario: Total Loss if All Items were Valued as 22K:</strong> ₹<span id="totalLossIfAllItemsWere22K"></span>
+                <div class="details input-hint" style="float: none; margin-top: 5px;">(Compares offered rate to the value if each item (mapped below 22K) was actually 22K).</div>
+            </div>
+            <div id="itemBreakdownOutput" style="margin-top:15px; padding-top:10px; border-top:1px dashed #ccc;">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        const K24_STANDARD = 24;
+        const SUPPORTED_KARATS = [18, 19, 20, 21, 22]; 
+
+        const rate24KInput = document.getElementById('rate24K');
+        const rate22KInput = document.getElementById('rate22K');
+        const depreciationInput = document.getElementById('depreciation');
+        const goldItemsContainer = document.getElementById('goldItemsContainer');
+        const resultsSection = document.getElementById('results');
+        const itemBreakdownOutput = document.getElementById('itemBreakdownOutput');
+
+        let itemIdCounter = 0;
+
+        rate24KInput.addEventListener('input', () => {
+            const rate24 = parseFloat(rate24KInput.value);
+            if (!isNaN(rate24) && rate24 > 0) {
+                rate22KInput.value = (rate24 * (22 / K24_STANDARD)).toFixed(2);
+            } else if (rate24KInput.value === "") {
+                rate22KInput.value = "";
+            }
+        });
+
+        rate22KInput.addEventListener('input', () => {
+            const rate22 = parseFloat(rate22KInput.value);
+            if (!isNaN(rate22) && rate22 > 0) {
+                rate24KInput.value = (rate22 * (K24_STANDARD / 22)).toFixed(2);
+            } else if (rate22KInput.value === "") {
+                rate24KInput.value = "";
+            }
+        });
+
+        function fetchGoldRate() {
+            alert("Live gold rate fetching is not implemented in this demo due to CORS limitations. Please enter rates manually or set up a backend proxy.");
+        }
+
+        function addGoldItem() {
+            itemIdCounter++;
+            const newItemRow = document.createElement('div');
+            newItemRow.classList.add('gold-item-row');
+            newItemRow.setAttribute('id', `item-${itemIdCounter}`);
+            newItemRow.innerHTML = `
+                <div class="input-group">
+                    <label for="grams-${itemIdCounter}">Grams</label>
+                    <input type="number" id="grams-${itemIdCounter}" class="item-grams" placeholder="e.g., 10">
+                </div>
+                <div class="input-group">
+                    <label for="purity-${itemIdCounter}">Purity</label>
+                    <input type="text" id="purity-${itemIdCounter}" class="item-purity" placeholder="e.g., 21.5K or 90%">
+                </div>
+                <button type="button" class="remove-item-btn" onclick="removeGoldItem('item-${itemIdCounter}')">Remove</button>
+            `;
+            goldItemsContainer.appendChild(newItemRow);
+        }
+
+        function removeGoldItem(itemId) {
+            const itemToRemove = document.getElementById(itemId);
+            if (itemToRemove) {
+                goldItemsContainer.removeChild(itemToRemove);
+            }
+        }
+
+        // --- CORRECTED parsePurity function ---
+        function parsePurity(purityStr) {
+            if (!purityStr) return NaN;
+            purityStr = purityStr.trim().toLowerCase();
+            if (purityStr === "") return NaN; 
+
+            let numericPurity = NaN; 
+
+            if (purityStr.endsWith('k')) {
+                numericPurity = parseFloat(purityStr.replace('k', ''));
+            } else if (purityStr.endsWith('%')) {
+                numericPurity = parseFloat(purityStr.replace('%', '')) / 100 * K24_STANDARD;
+            } else {
+                const p = parseFloat(purityStr);
+                if (!isNaN(p)) { 
+                    if (p > 0 && p <= 1) { 
+                        numericPurity = p * K24_STANDARD;
+                    } else if (p >= 0 && p <= K24_STANDARD) { 
+                        numericPurity = p;
+                    }
+                }
+            }
+
+            if (isNaN(numericPurity) || numericPurity < 0 || numericPurity > K24_STANDARD) {
+                return NaN;
+            }
+            return numericPurity;
+        }
+
+        function mapPurityToStandard(actualPurityKarat) {
+            if (isNaN(actualPurityKarat)) return NaN;
+            let mappedKarat = 0;
+            for (let i = SUPPORTED_KARATS.length - 1; i >= 0; i--) {
+                if (actualPurityKarat >= SUPPORTED_KARATS[i]) {
+                    mappedKarat = SUPPORTED_KARATS[i];
+                    break;
+                }
+            }
+            return mappedKarat;
+        }
+
+        function calculateValue() {
+            resultsSection.style.display = 'none'; // Hide results initially or if errors occur
+            itemBreakdownOutput.innerHTML = "";   // Clear previous breakdown
+
+            const baseRate24K = parseFloat(rate24KInput.value);
+            const depreciationPercent = parseFloat(depreciationInput.value) / 100;
+
+            if (isNaN(baseRate24K) || baseRate24K <= 0) {
+                alert("Please enter a valid Market Gold Rate for 24K gold.");
+                rate24KInput.focus();
+                return;
+            }
+            if (isNaN(depreciationPercent) || depreciationPercent < 0 || depreciationPercent > 1) {
+                alert("Please enter a valid depreciation percentage (0-100).");
+                depreciationInput.focus();
+                return;
+            }
+
+            const itemRows = goldItemsContainer.getElementsByClassName('gold-item-row');
+            if (itemRows.length === 0) {
+                alert("Please add at least one gold item.");
+                return;
+            }
+
+            let totalGramsAllItems = 0;
+            let totalActualValueMappedAllItems = 0;
+            let totalValueAtInputPurityAllItems = 0;
+            let hypotheticalTotalValueIfAllWere22K = 0;
+            let itemsValidFor22KScenarioCounter = 0; // Renamed for clarity
+            let itemBreakdownHTML = '<h3>Itemization:</h3>';
+            let allItemsValid = true;
+
+
+            for (let i = 0; i < itemRows.length; i++) {
+                const row = itemRows[i];
+                const gramsInput = row.querySelector('.item-grams');
+                const purityInput = row.querySelector('.item-purity');
+
+                const grams = parseFloat(gramsInput.value);
+                const purityStr = purityInput.value;
+
+                if (isNaN(grams) || grams <= 0) {
+                    alert(`Invalid grams for item ${i + 1}. Please check.`);
+                    gramsInput.focus();
+                    allItemsValid = false;
+                    break;
+                }
+                if (purityStr.trim() === "") { // Check before parsePurity
+                    alert(`Purity not entered for item ${i + 1}. Please check.`);
+                    purityInput.focus();
+                    allItemsValid = false;
+                    break;
+                }
+
+                const inputPurityKarat = parsePurity(purityStr);
+                if (isNaN(inputPurityKarat)) { // Covers all invalid purity cases from parsePurity
+                    alert(`Invalid purity value "${purityStr}" for item ${i + 1}. Use formats like "22K", "91.6%", "0.916", or "0". Max ${K24_STANDARD}K.`);
+                    purityInput.focus();
+                    allItemsValid = false;
+                    break;
+                }
+
+                const mappedKarat = mapPurityToStandard(inputPurityKarat);
+
+                if (mappedKarat === 0 && inputPurityKarat > 0) { // Has gold but below lowest standard
+                    alert(`Item ${i + 1} (Purity: ${inputPurityKarat.toFixed(2)}K) is below the minimum mappable standard of ${SUPPORTED_KARATS[0]}K. It won't be valued based on current standards.`);
+                    allItemsValid = false;
+                    break;
+                }
+                
+                totalGramsAllItems += grams;
+
+                if (inputPurityKarat === 0) { // Item has 0 purity
+                     itemBreakdownHTML += `<div class="output-item"><strong>Item ${i+1}:</strong> ${grams.toFixed(2)}g, Input Purity 0K (Mapped to 0K) <span style="font-size: 0.9em;">Value: ₹0.00</span></div>`;
+                     // No value added to totalActualValueMappedAllItems or totalValueAtInputPurityAllItems
+                     // For hypothetical 22K scenario, a 0 purity item still has 0 value if it were "22K"
+                } else { // Item has gold purity > 0 and is mappable (or was caught by alert above if not)
+                    const marketPricePerGramMappedKarat = (baseRate24K / K24_STANDARD) * mappedKarat;
+                    const actualValueMappedForItem = marketPricePerGramMappedKarat * grams;
+                    totalActualValueMappedAllItems += actualValueMappedForItem;
+
+                    const marketPricePerGramInputPurity = (baseRate24K / K24_STANDARD) * inputPurityKarat;
+                    const valueAtInputPurityForItem = marketPricePerGramInputPurity * grams;
+                    totalValueAtInputPurityAllItems += valueAtInputPurityForItem;
+                    
+                    itemBreakdownHTML += `<div class="output-item">
+                        <strong>Item ${i+1}:</strong> ${grams.toFixed(2)}g @ Input ${inputPurityKarat.toFixed(2)}K (Mapped to ${mappedKarat}K)
+                        <span style="font-size: 0.9em;">Value (Mapped): ₹${actualValueMappedForItem.toFixed(2)}</span>
+                    </div>`;
+
+                    // For "if all were 22K" scenario calculation
+                    const marketPricePerGram22K = (baseRate24K / K24_STANDARD) * 22;
+                    const valueIfItemWere22K = marketPricePerGram22K * grams;
+
+                    if (mappedKarat < 22) {
+                        hypotheticalTotalValueIfAllWere22K += valueIfItemWere22K;
+                        itemsValidFor22KScenarioCounter++;
+                    } else { // Item is already 22K or mapped as such (or higher if supported)
+                        hypotheticalTotalValueIfAllWere22K += actualValueMappedForItem; // Use its already good (or better) mapped value
+                    }
+                }
+            }
+
+            if (!allItemsValid) {
+                // resultsSection is already hidden, itemBreakdown is cleared
+                return;
+            }
+            itemBreakdownOutput.innerHTML = itemBreakdownHTML;
+
+
+            const offeredRateTotal = totalActualValueMappedAllItems * (1 - depreciationPercent);
+            const totalLossOverall = totalValueAtInputPurityAllItems - offeredRateTotal;
+            const perGramLossOverall = totalGramsAllItems > 0 ? totalLossOverall / totalGramsAllItems : 0;
+            
+            let totalLossIfAllItemsWere22KScenario = hypotheticalTotalValueIfAllWere22K - offeredRateTotal;
+
+
+            document.getElementById('totalGrams').textContent = totalGramsAllItems.toFixed(2);
+            document.getElementById('totalActualValue').textContent = totalActualValueMappedAllItems.toFixed(2);
+            document.getElementById('offeredRate').textContent = offeredRateTotal.toFixed(2);
+            document.getElementById('totalInputValue').textContent = totalValueAtInputPurityAllItems.toFixed(2);
+            document.getElementById('totalLoss').textContent = totalLossOverall.toFixed(2);
+            document.getElementById('perGramLoss').textContent = perGramLossOverall.toFixed(2);
+
+            if (totalGramsAllItems > 0 && totalValueAtInputPurityAllItems === 0) { // All items had 0 purity but had weight
+                 document.getElementById('totalLossIfAllItemsWere22K').textContent = totalLossIfAllItemsWere22KScenario.toFixed(2) + " (Based on 0 value for 0 purity items)";
+            } else if (itemsValidFor22KScenarioCounter === 0 && totalGramsAllItems > 0) {
+                document.getElementById('totalLossIfAllItemsWere22K').textContent = totalLossIfAllItemsWere22KScenario.toFixed(2) + " (No items valued below 22K)";
+            } else if (totalGramsAllItems === 0) {
+                 document.getElementById('totalLossIfAllItemsWere22K').textContent = "N/A";
+            }
+            else {
+                document.getElementById('totalLossIfAllItemsWere22K').textContent = totalLossIfAllItemsWere22KScenario.toFixed(2);
+            }
+
+            resultsSection.style.display = 'block';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            addGoldItem(); // Start with one item row
+            // Ensure results are hidden on fresh load
+            const results = document.getElementById('results');
+            if (results) {
+                results.style.display = 'none';
+            }
+        });
+
+    </script>
+</body>
+</html>
